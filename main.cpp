@@ -72,7 +72,7 @@ int main()
     ejemplo_de_paso_params_funciones();
     array_y_punteros();
 
-    return true;
+    return 0;
 }
 
 
