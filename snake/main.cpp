@@ -12,7 +12,8 @@ struct Position
 
 struct Snake
 {
-    
+    Position initialPosition;
+    int length;
 };
 
 
@@ -34,6 +35,14 @@ void drawSnake(SDL_Renderer* renderer, std::vector<Position>& snake, int cellSiz
     }
 }
 
+void moveSnake(SDL_Renderer* renderer, std::vector<Position>& snake, Position delta, bool eat) 
+{
+    Position newHead = { snake[0].x + 0, snake[0].y + 1 };
+    snake.insert(snake.begin(), newHead);
+
+        
+}
+
 
 
 
@@ -51,8 +60,8 @@ int main(int argc, char const *argv[])
 
     std::vector<Position> snake =
     {
-        {3, 5},
-        {3, 4},
+        {1, 3},
+        {2, 3},
         {3, 3},
     };
 
@@ -86,6 +95,8 @@ int main(int argc, char const *argv[])
 
         // draw snake
         drawSnake(renderer, snake, 10);
+
+       
         // SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
         // SDL_FRect rect = { 400 - 25, 300 - 25, 50, 50 };   // un cuadrado de 50x50 en el centro
         // SDL_RenderFillRect(renderer, &rect);
