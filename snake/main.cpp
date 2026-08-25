@@ -16,7 +16,20 @@ struct Snake
     int length;
 };
 
+struct Delta
+{
+    int dx;
+    int dy;
+};
 
+
+void keyboardInput(SDL_Keycode key, Delta &direccion)
+{
+    if(key == SDLK_UP && direccion.dy != 1)     { direccion.dx = 0; direccion.dy = -1; } 
+    if(key == SDLK_DOWN && direccion.dy != -1)   { direccion.dx = 0; direccion.dy = 1; }
+    if(key == SDLK_LEFT && direccion.dx != 1)   { direccion.dx = -1; direccion.dy = 0; }
+    if(key == SDLK_RIGHT && direccion.dx != -1)  { direccion.dx = 1; direccion.dy = 0; }
+}
 
 
 void drawSnake(SDL_Renderer* renderer, std::vector<Position>& snake, int cellSize)
@@ -35,11 +48,16 @@ void drawSnake(SDL_Renderer* renderer, std::vector<Position>& snake, int cellSiz
     }
 }
 
-void moveSnake(SDL_Renderer* renderer, std::vector<Position>& snake, Position delta, bool eat) 
+void moveSnake(std::vector<Position>& snake, Delta direction, bool eat) 
 {
-    Position newHead = { snake[0].x + 0, snake[0].y + 1 };
+    // falta agregar delta
+    Position newHead = { snake[0].x + direction.dx, snake[0].y + direction.dy };
     snake.insert(snake.begin(), newHead);
 
+    if(!eat)
+    {
+        snake.pop_back();
+    }
         
 }
 
@@ -65,6 +83,7 @@ int main(int argc, char const *argv[])
         {3, 3},
     };
 
+    Delta direccionInicial = { 0, 0 };
 
     if (!renderer) {
         std::cout << "Error creando renderer: " << SDL_GetError() << std::endl;
@@ -81,7 +100,7 @@ int main(int argc, char const *argv[])
                     break;
 
                 case SDL_EVENT_KEY_DOWN:
-                    std::cout << "clic tecla" << std::endl;
+                    keyboardInput(event.key.key, direccionInicial);
                     break;
 
                 default:
@@ -92,6 +111,8 @@ int main(int argc, char const *argv[])
 
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderClear(renderer);
+
+        moveSnake(renderer, snake, direccionInicial, false);
 
         // draw snake
         drawSnake(renderer, snake, 10);
