@@ -65,25 +65,28 @@ void moveSnake(std::vector<Position>& snake, Delta direction, bool eat)
 
 
 int main(int argc, char const *argv[])
-{
+{    
     SDL_Window* window = nullptr;
     SDL_Renderer* renderer = nullptr;
 
     SDL_Init(SDL_INIT_VIDEO);
     SDL_CreateWindowAndRenderer("Snake", 800, 600, 0, &window, &renderer);
     // SDL_SetRenderScale(renderer, 4, 4);
-
-    bool running = true;
-    SDL_Event event;
-
     std::vector<Position> snake =
     {
         {1, 3},
         {2, 3},
         {3, 3},
     };
-
+    
+    bool running = true;
+    SDL_Event event;
+    
     Delta direccionInicial = { 0, 0 };
+
+    Uint64 lastMovement = SDL_GetTicks();
+    const Uint64 intervalMovement = 150;
+
 
     if (!renderer) {
         std::cout << "Error creando renderer: " << SDL_GetError() << std::endl;
@@ -112,7 +115,14 @@ int main(int argc, char const *argv[])
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderClear(renderer);
 
-        moveSnake(renderer, snake, direccionInicial, false);
+        Uint64 now = SDL_GetTicks();
+        if(now - lastMovement >= intervalMovement)
+        {
+            moveSnake(snake, direccionInicial, false);
+            lastMovement = now;
+        }
+
+
 
         // draw snake
         drawSnake(renderer, snake, 10);
