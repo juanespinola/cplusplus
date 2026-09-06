@@ -5,6 +5,8 @@
 #include <cstdlib>
 #include <ctime>
 
+#include "char_letras.h"
+
 struct Position
 {
     int x;
@@ -22,6 +24,14 @@ struct Delta
     int dx;
     int dy;
 };
+
+enum class GameState
+{
+    MENU,
+    PLAYING,
+    QUIT
+};
+
 
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 600;
@@ -120,6 +130,14 @@ void collisionDetection(std::vector<Position>& snake, Position &food, bool &eat,
     {
         eat = false;
     }
+
+    // aqui verificamos si choco contra el grid
+    if(snake[0].x < 0 || snake[0].x >= grid.w || snake[0].y < 0 || snake[0].y >= grid.h)
+    {
+        std::cout << "Game Over" << std::endl;
+        exit(0);
+    }
+
 }
 
 void drawGrid(SDL_Renderer* renderer, SDL_Rect &grid)
@@ -130,6 +148,44 @@ void drawGrid(SDL_Renderer* renderer, SDL_Rect &grid)
     SDL_RenderDrawRect(renderer, &grid); // dibuja un cuadrado blanco en el centro de la ventana           
 }
 
+void drawChar(SDL_Renderer* renderer, char c, Position pos, int pixelSize)
+{
+    const char** letters = getLetraMayuscula(c);
+    SDL_Rect letter;
+    for (int row = 0; row < FONT_HEIGHT; row++)
+    {
+        for (int column = 0; column < FONT_WIDTH; column++)
+        {
+            SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+    
+            char pixel = letters[row][column];
+
+            if(pixel == '1')
+            {
+                letter.x = pos.x + (column * pixelSize);
+                letter.y = pos.y +  (row * pixelSize);
+                letter.w = pixelSize;
+                letter.h = pixelSize;
+                SDL_RenderFillRect(renderer, &letter);
+            }
+        }
+        
+    }
+    
+
+}
+
+void drawText(SDL_Renderer* renderer, const char* text, Position pos, int pixelSize, int spacing)
+{
+    int offsetX = 0;
+    for(int i = 0; text[i] != '\0'; i++)
+    {
+        Position charPos = { pos.x + offsetX, pos.y };
+        drawChar(renderer, text[i], charPos, pixelSize);
+        offsetX += (FONT_WIDTH * pixelSize) + spacing;
+    }
+}
+
 
 int main(int argc, char const *argv[])
 {
@@ -138,8 +194,19 @@ int main(int argc, char const *argv[])
     srand(time(nullptr));
 
     SDL_Init(SDL_INIT_VIDEO);
-    SDL_CreateWindowAndRenderer(SCREEN_HEIGHT, SCREEN_WIDTH, 0, &window, &renderer);
+    SDL_CreateWindowAndRenderer(SCREEN_WIDTH, SCREEN_HEIGHT, 0, &window, &renderer);
     // SDL_SetRenderScale(renderer, 4, 4);
+
+    /*
+    * VARIABLES DE MENU
+    */
+
+    GameState currentState = GameState::MENU; // valor inicial
+
+
+    /*
+    *   VARIABLES DE JUEGO
+    */
     std::vector<Position> snake =
     {
         {1, 3},
@@ -148,15 +215,18 @@ int main(int argc, char const *argv[])
     };
     Position food = { 5, 5 };
     bool eat = false;
+    Delta direccionInicial = { 0, 0 };
 
+    /*
+    *    VARIABLES DEL SISTEMA
+    */
     bool running = true;
     SDL_Event event;
     
-    Delta direccionInicial = { 0, 0 };
 
     Uint64 lastMovement = SDL_GetTicks();
     const Uint64 intervalMovement = 150;
-    SDL_Rect grid = { 2, 2, SCREEN_HEIGHT - 4, SCREEN_WIDTH - 4 };
+    SDL_Rect grid = { 2, 2, SCREEN_WIDTH - 4, SCREEN_HEIGHT - 4 };
 
     if (!renderer) {
         std::cout << "Error creando renderer: " << SDL_GetError() << std::endl;
@@ -166,47 +236,89 @@ int main(int argc, char const *argv[])
     {
         while (SDL_PollEvent(&event))
         {
-            switch (event.type)
+            if(event.type == SDL_QUIT)
             {
-                // case SDL_EVENT_QUIT:
-                case SDL_QUIT:
-                    running = false;
-                    break;
-
-                // case SDL_EVENT_KEY_DOWN:
-                case SDL_KEYDOWN:
-                    // keyboardInput(event.key.key, direccionInicial);
-                    keyboardInput(event.key.keysym.sym, direccionInicial);
-                    break;
-
-                default:
-                    break;
+                running = false;
             }
+
+            if(currentState == GameState::MENU)
+            {
+                if(event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_p)
+                {
+                    currentState = GameState::PLAYING;
+                } 
+            } 
+            else if(currentState == GameState::PLAYING) 
+            {
+                if(event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE)
+                {
+                    currentState = GameState::QUIT;
+                } 
+                else if(event.type == SDL_KEYDOWN)
+                {
+                    keyboardInput(event.key.keysym.sym, direccionInicial);
+                } 
+                 
+            } 
+            
+            
+            // switch (event.type)
+            // {
+            //     // case SDL_EVENT_QUIT:
+            //     case SDL_QUIT:
+            //         running = false;
+            //         break;
+
+            //     // case SDL_EVENT_KEY_DOWN:
+            //     case SDL_KEYDOWN:
+                    
+
+            //         // keyboardInput(event.key.key, direccionInicial);
+            //         keyboardInput(event.key.keysym.sym, direccionInicial);
+            //         break;
+
+            //     default:
+            //         break;
+            // }
             
         }
 
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderClear(renderer);
 
-        Uint64 now = SDL_GetTicks();
-        if(now - lastMovement >= intervalMovement)
+
+
+        // update
+        if(currentState == GameState::MENU)
         {
-            moveSnake(snake, direccionInicial, eat);
-            // collision detection
-            collisionDetection(snake, food, eat, grid);
-            lastMovement = now;
+            drawText(renderer, "SNAKE", {250, 80}, 8, 4);
+            drawText(renderer, "JUGAR", {300, 250}, 5, 3);
+            drawText(renderer, "SALIR", {300, 330}, 5, 3);
         }
+        else if(currentState == GameState::PLAYING)
+        {
+
+        
+            Uint64 now = SDL_GetTicks();
+            if(now - lastMovement >= intervalMovement)
+            {
+                moveSnake(snake, direccionInicial, eat);
+                // collision detection
+                collisionDetection(snake, food, eat, grid);
+                lastMovement = now;
+            }
 
 
 
-        // draw snake
-        drawSnake(renderer, snake, 10);
-        // draw food
-        drawFood(renderer, food, 10);
-       
-        // generateFood(food, snake);
-        // draw grid
-        drawGrid(renderer, grid);
+            // draw snake
+            drawSnake(renderer, snake, 10);
+            // draw food
+            drawFood(renderer, food, 10);
+        
+            // generateFood(food, snake);
+            // draw grid
+            drawGrid(renderer, grid);
+        }
 
         SDL_RenderPresent(renderer);
     }
