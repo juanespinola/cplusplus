@@ -35,6 +35,7 @@ enum class GameState
 
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 600;
+const int MENU_OPTIONS = 2;
 
 
 void keyboardInput(SDL_Keycode key, Delta &direccion)
@@ -43,6 +44,13 @@ void keyboardInput(SDL_Keycode key, Delta &direccion)
     if(key == SDLK_DOWN && direccion.dy != -1)   { direccion.dx = 0; direccion.dy = 1; }
     if(key == SDLK_LEFT && direccion.dx != 1)   { direccion.dx = -1; direccion.dy = 0; }
     if(key == SDLK_RIGHT && direccion.dx != -1)  { direccion.dx = 1; direccion.dy = 0; }
+}
+
+void menuInput(SDL_Keycode key, int &selectedOption)
+{
+    if(key == SDLK_UP) { selectedOption = (selectedOption - 1 + MENU_OPTIONS ) % MENU_OPTIONS; } 
+    if(key == SDLK_DOWN) { selectedOption = (selectedOption + 1 ) % MENU_OPTIONS; } 
+    std::cout << selectedOption << std::endl;
 }
 
 
@@ -148,7 +156,7 @@ void drawGrid(SDL_Renderer* renderer, SDL_Rect &grid)
     SDL_RenderDrawRect(renderer, &grid); // dibuja un cuadrado blanco en el centro de la ventana           
 }
 
-void drawChar(SDL_Renderer* renderer, char c, Position pos, int pixelSize)
+void drawChar(SDL_Renderer* renderer, char c, Position pos, int pixelSize, SDL_Color color)
 {
     const char** letters = getLetraMayuscula(c);
     SDL_Rect letter;
@@ -156,7 +164,7 @@ void drawChar(SDL_Renderer* renderer, char c, Position pos, int pixelSize)
     {
         for (int column = 0; column < FONT_WIDTH; column++)
         {
-            SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+            SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
     
             char pixel = letters[row][column];
 
@@ -175,13 +183,13 @@ void drawChar(SDL_Renderer* renderer, char c, Position pos, int pixelSize)
 
 }
 
-void drawText(SDL_Renderer* renderer, const char* text, Position pos, int pixelSize, int spacing)
+void drawText(SDL_Renderer* renderer, const char* text, Position pos, int pixelSize, int spacing, SDL_Color color)
 {
     int offsetX = 0;
     for(int i = 0; text[i] != '\0'; i++)
     {
         Position charPos = { pos.x + offsetX, pos.y };
-        drawChar(renderer, text[i], charPos, pixelSize);
+        drawChar(renderer, text[i], charPos, pixelSize, color);
         offsetX += (FONT_WIDTH * pixelSize) + spacing;
     }
 }
@@ -216,7 +224,7 @@ int main(int argc, char const *argv[])
     Position food = { 5, 5 };
     bool eat = false;
     Delta direccionInicial = { 0, 0 };
-
+    int selectedOption = 0;
     /*
     *    VARIABLES DEL SISTEMA
     */
@@ -243,10 +251,10 @@ int main(int argc, char const *argv[])
 
             if(currentState == GameState::MENU)
             {
-                if(event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_p)
+                if(event.type == SDL_KEYDOWN)
                 {
-                    currentState = GameState::PLAYING;
-                } 
+                    menuInput(event.key.keysym.sym, selectedOption);
+                }
             } 
             else if(currentState == GameState::PLAYING) 
             {
@@ -291,9 +299,13 @@ int main(int argc, char const *argv[])
         // update
         if(currentState == GameState::MENU)
         {
-            drawText(renderer, "SNAKE", {250, 80}, 8, 4);
-            drawText(renderer, "JUGAR", {300, 250}, 5, 3);
-            drawText(renderer, "SALIR", {300, 330}, 5, 3);
+            SDL_Color normal = {255, 255, 255, 255};   // blanco
+            SDL_Color resaltado = {255, 255, 0, 255};  // amarillo, por ejemplo
+
+
+            drawText(renderer, "SNAKE", {250, 80}, 8, 4, normal);
+            drawText(renderer, "JUGAR", {300, 250}, 5, 3, (selectedOption == 0) ? resaltado : normal);
+            drawText(renderer, "SALIR", {300, 330}, 5, 3, (selectedOption == 1) ? resaltado : normal);
         }
         else if(currentState == GameState::PLAYING)
         {
