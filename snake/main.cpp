@@ -251,7 +251,14 @@ int main(int argc, char const *argv[])
 
             if(currentState == GameState::MENU)
             {
-                if(event.type == SDL_KEYDOWN)
+                if(event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_RETURN)
+                {
+                    currentState = (selectedOption == 0) ? GameState::PLAYING : GameState::QUIT;
+                    std::cout << "selectedOption: " << selectedOption 
+                    << " | currentState: " << static_cast<int>(currentState) 
+                    << std::endl;
+                } 
+                else if(event.type == SDL_KEYDOWN)
                 {
                     menuInput(event.key.keysym.sym, selectedOption);
                 }
@@ -267,6 +274,9 @@ int main(int argc, char const *argv[])
                     keyboardInput(event.key.keysym.sym, direccionInicial);
                 } 
                  
+            } else if (currentState == GameState::QUIT)
+            {
+                exit(1);
             } 
             
             
