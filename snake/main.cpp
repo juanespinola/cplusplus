@@ -1,29 +1,15 @@
 #include <iostream>
-#include <vector>
+
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <cstdlib>
 #include <ctime>
 
 #include "char_letras.h"
+#include "scene_manager.h"
+#include "menu_scene.h"
 
-struct Position
-{
-    int x;
-    int y;
-};
 
-struct Snake
-{
-    Position initialPosition;
-    int length;
-};
-
-struct Delta
-{
-    int dx;
-    int dy;
-};
 
 enum class GameState
 {
@@ -33,9 +19,7 @@ enum class GameState
 };
 
 
-const int SCREEN_WIDTH = 800;
-const int SCREEN_HEIGHT = 600;
-const int MENU_OPTIONS = 2;
+
 
 
 void keyboardInput(SDL_Keycode key, Delta &direccion)
@@ -156,43 +140,6 @@ void drawGrid(SDL_Renderer* renderer, SDL_Rect &grid)
     SDL_RenderDrawRect(renderer, &grid); // dibuja un cuadrado blanco en el centro de la ventana           
 }
 
-void drawChar(SDL_Renderer* renderer, char c, Position pos, int pixelSize, SDL_Color color)
-{
-    const char** letters = getLetraMayuscula(c);
-    SDL_Rect letter;
-    for (int row = 0; row < FONT_HEIGHT; row++)
-    {
-        for (int column = 0; column < FONT_WIDTH; column++)
-        {
-            SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
-    
-            char pixel = letters[row][column];
-
-            if(pixel == '1')
-            {
-                letter.x = pos.x + (column * pixelSize);
-                letter.y = pos.y +  (row * pixelSize);
-                letter.w = pixelSize;
-                letter.h = pixelSize;
-                SDL_RenderFillRect(renderer, &letter);
-            }
-        }
-        
-    }
-    
-
-}
-
-void drawText(SDL_Renderer* renderer, const char* text, Position pos, int pixelSize, int spacing, SDL_Color color)
-{
-    int offsetX = 0;
-    for(int i = 0; text[i] != '\0'; i++)
-    {
-        Position charPos = { pos.x + offsetX, pos.y };
-        drawChar(renderer, text[i], charPos, pixelSize, color);
-        offsetX += (FONT_WIDTH * pixelSize) + spacing;
-    }
-}
 
 
 int main(int argc, char const *argv[])
@@ -240,6 +187,9 @@ int main(int argc, char const *argv[])
         std::cout << "Error creando renderer: " << SDL_GetError() << std::endl;
     }
 
+    SceneManager sceneManager;
+    sceneManager.changeScene(new MenuScene(&sceneManager));
+    
     while (running)
     {
         while (SDL_PollEvent(&event))
@@ -248,36 +198,38 @@ int main(int argc, char const *argv[])
             {
                 running = false;
             }
-
-            if(currentState == GameState::MENU)
-            {
-                if(event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_RETURN)
-                {
-                    currentState = (selectedOption == 0) ? GameState::PLAYING : GameState::QUIT;
-                    std::cout << "selectedOption: " << selectedOption 
-                    << " | currentState: " << static_cast<int>(currentState) 
-                    << std::endl;
-                } 
-                else if(event.type == SDL_KEYDOWN)
-                {
-                    menuInput(event.key.keysym.sym, selectedOption);
-                }
-            } 
-            else if(currentState == GameState::PLAYING) 
-            {
-                if(event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE)
-                {
-                    currentState = GameState::QUIT;
-                } 
-                else if(event.type == SDL_KEYDOWN)
-                {
-                    keyboardInput(event.key.keysym.sym, direccionInicial);
-                } 
+            
+            sceneManager.handleInput(event);
+            
+            // if(currentState == GameState::MENU)
+            // {
+            //     if(event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_RETURN)
+            //     {
+            //         currentState = (selectedOption == 0) ? GameState::PLAYING : GameState::QUIT;
+            //         std::cout << "selectedOption: " << selectedOption 
+            //         << " | currentState: " << static_cast<int>(currentState) 
+            //         << std::endl;
+            //     } 
+            //     else if(event.type == SDL_KEYDOWN)
+            //     {
+            //         menuInput(event.key.keysym.sym, selectedOption);
+            //     }
+            // } 
+            // else if(currentState == GameState::PLAYING) 
+            // {
+            //     if(event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE)
+            //     {
+            //         currentState = GameState::QUIT;
+            //     } 
+            //     else if(event.type == SDL_KEYDOWN)
+            //     {
+            //         keyboardInput(event.key.keysym.sym, direccionInicial);
+            //     } 
                  
-            } else if (currentState == GameState::QUIT)
-            {
-                exit(1);
-            } 
+            // } else if (currentState == GameState::QUIT)
+            // {
+            //     exit(1);
+            // } 
             
             
             // switch (event.type)
@@ -300,47 +252,47 @@ int main(int argc, char const *argv[])
             // }
             
         }
-
+      
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderClear(renderer);
 
-
+        sceneManager.render(renderer);
 
         // update
-        if(currentState == GameState::MENU)
-        {
-            SDL_Color normal = {255, 255, 255, 255};   // blanco
-            SDL_Color resaltado = {255, 255, 0, 255};  // amarillo, por ejemplo
+        // if(currentState == GameState::MENU)
+        // {
+        //     SDL_Color normal = {255, 255, 255, 255};   // blanco
+        //     SDL_Color resaltado = {255, 255, 0, 255};  // amarillo, por ejemplo
 
 
-            drawText(renderer, "SNAKE", {250, 80}, 8, 4, normal);
-            drawText(renderer, "JUGAR", {300, 250}, 5, 3, (selectedOption == 0) ? resaltado : normal);
-            drawText(renderer, "SALIR", {300, 330}, 5, 3, (selectedOption == 1) ? resaltado : normal);
-        }
-        else if(currentState == GameState::PLAYING)
-        {
+        //     drawText(renderer, "SNAKE", {250, 80}, 8, 4, normal);
+        //     drawText(renderer, "JUGAR", {300, 250}, 5, 3, (selectedOption == 0) ? resaltado : normal);
+        //     drawText(renderer, "SALIR", {300, 330}, 5, 3, (selectedOption == 1) ? resaltado : normal);
+        // }
+        // else if(currentState == GameState::PLAYING)
+        // {
 
         
-            Uint64 now = SDL_GetTicks();
-            if(now - lastMovement >= intervalMovement)
-            {
-                moveSnake(snake, direccionInicial, eat);
-                // collision detection
-                collisionDetection(snake, food, eat, grid);
-                lastMovement = now;
-            }
+        //     Uint64 now = SDL_GetTicks();
+        //     if(now - lastMovement >= intervalMovement)
+        //     {
+        //         moveSnake(snake, direccionInicial, eat);
+        //         // collision detection
+        //         collisionDetection(snake, food, eat, grid);
+        //         lastMovement = now;
+        //     }
 
 
 
-            // draw snake
-            drawSnake(renderer, snake, 10);
-            // draw food
-            drawFood(renderer, food, 10);
+        //     // draw snake
+        //     drawSnake(renderer, snake, 10);
+        //     // draw food
+        //     drawFood(renderer, food, 10);
         
-            // generateFood(food, snake);
-            // draw grid
-            drawGrid(renderer, grid);
-        }
+        //     // generateFood(food, snake);
+        //     // draw grid
+        //     drawGrid(renderer, grid);
+        // }
 
         SDL_RenderPresent(renderer);
     }

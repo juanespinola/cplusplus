@@ -8,7 +8,13 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(SDL2 REQUIRED sdl2)
  
-add_executable(snake main.cpp char_letras.cpp)
+add_executable(
+    snake main.cpp 
+    char_letras.cpp 
+    scene_manager.cpp 
+    menu_scene.cpp 
+    playing_scene.cpp
+)
  
 target_include_directories(snake PRIVATE ${SDL2_INCLUDE_DIRS})
 target_link_libraries(snake PRIVATE ${SDL2_LIBRARIES})

@@ -129,4 +129,42 @@ const char** getLetraMayuscula(char c)
     if(c == ' ') return letraSpace;
     if(c == '.') return letraPunto;
     return alfabeto[c - 'A'];
-}
+};
+
+
+void drawChar(SDL_Renderer* renderer, char c, Position pos, int pixelSize, SDL_Color color)
+{
+    const char** letters = getLetraMayuscula(c);
+    SDL_Rect letter;
+    for (int row = 0; row < FONT_HEIGHT; row++)
+    {
+        for (int column = 0; column < FONT_WIDTH; column++)
+        {
+            SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
+    
+            char pixel = letters[row][column];
+
+            if(pixel == '1')
+            {
+                letter.x = pos.x + (column * pixelSize);
+                letter.y = pos.y +  (row * pixelSize);
+                letter.w = pixelSize;
+                letter.h = pixelSize;
+                SDL_RenderFillRect(renderer, &letter);
+            }
+        }
+        
+    }
+    
+};
+
+void drawText(SDL_Renderer* renderer, const char* text, Position pos, int pixelSize, int spacing, SDL_Color color)
+{
+    int offsetX = 0;
+    for(int i = 0; text[i] != '\0'; i++)
+    {
+        Position charPos = { pos.x + offsetX, pos.y };
+        drawChar(renderer, text[i], charPos, pixelSize, color);
+        offsetX += (FONT_WIDTH * pixelSize) + spacing;
+    }
+};
