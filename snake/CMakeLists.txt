@@ -5,8 +5,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
  
-find_package(PkgConfig REQUIRED)
-pkg_check_modules(SDL2 REQUIRED sdl2)
+find_package(SDL2 REQUIRED CONFIG)
  
 add_executable(
     snake main.cpp 
@@ -17,9 +16,10 @@ add_executable(
     timer.cpp
 )
  
-target_include_directories(snake PRIVATE ${SDL2_INCLUDE_DIRS})
-target_link_libraries(snake PRIVATE ${SDL2_LIBRARIES})
-target_compile_options(snake PRIVATE ${SDL2_CFLAGS_OTHER})
+if(TARGET SDL2::SDL2main)
+    target_link_libraries(snake PRIVATE SDL2::SDL2main)
+endif()
+target_link_libraries(snake PRIVATE SDL2::SDL2)
  
 if(WIN32)
     add_custom_command(TARGET snake POST_BUILD
