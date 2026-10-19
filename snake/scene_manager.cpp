@@ -2,7 +2,9 @@
 
 void SceneManager::changeScene(Scene *newScene)
 {
-    currentScene = newScene;
+    pendingScene = newScene;
+    currentScene = nullptr;
+
 }
 
 void SceneManager::handleInput(SDL_Event &event)

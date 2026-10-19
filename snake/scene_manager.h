@@ -11,4 +11,5 @@ public:
 
 private:
     Scene *currentScene;
+    Scene *pendingScene;
 };

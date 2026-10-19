@@ -14,6 +14,7 @@ add_executable(
     scene_manager.cpp 
     menu_scene.cpp 
     playing_scene.cpp
+    timer.cpp
 )
  
 target_include_directories(snake PRIVATE ${SDL2_INCLUDE_DIRS})
