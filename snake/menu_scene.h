@@ -8,6 +8,8 @@ class MenuScene : public Scene
 {
 public:
     MenuScene(SceneManager *manager);
+    ~MenuScene();
+
     void handleInput(SDL_Event &event) override;
     void update(float deltaTime) override;
     void render(SDL_Renderer *renderer) override;

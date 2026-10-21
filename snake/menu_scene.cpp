@@ -10,6 +10,11 @@ MenuScene::MenuScene(SceneManager *manager)
     selectedOption = 0;
 }
 
+MenuScene::~MenuScene()
+{
+    std::cout << "Se destruyo Menu Scene" << std::endl;
+}
+
 void MenuScene::handleInput(SDL_Event &event)
 {
     if (event.type != SDL_KEYDOWN)

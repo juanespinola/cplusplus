@@ -75,8 +75,10 @@ int main(int argc, char *argv[])
     SceneManager sceneManager;
     sceneManager.changeScene(new MenuScene(&sceneManager));
     Timer timer;
+
     while (running)
     {
+        sceneManager.applyPendingScene();
         while (SDL_PollEvent(&event))
         {
             if(event.type == SDL_QUIT)

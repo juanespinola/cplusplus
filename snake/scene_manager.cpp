@@ -3,8 +3,6 @@
 void SceneManager::changeScene(Scene *newScene)
 {
     pendingScene = newScene;
-    currentScene = nullptr;
-
 }
 
 void SceneManager::handleInput(SDL_Event &event)
@@ -20,4 +18,22 @@ void SceneManager::update(float deltaTime)
 void SceneManager::render(SDL_Renderer *renderer)
 {
     currentScene->render(renderer);
+}
+
+void SceneManager::applyPendingScene()
+{
+    if(pendingScene == nullptr)
+    {
+        return;
+    }
+
+    delete currentScene;
+    currentScene = pendingScene;
+    pendingScene = nullptr;
+}
+
+SceneManager::~SceneManager()
+{
+    delete currentScene;
+    delete pendingScene;
 }

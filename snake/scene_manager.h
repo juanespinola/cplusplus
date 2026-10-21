@@ -8,8 +8,10 @@ public:
     void handleInput(SDL_Event &event);
     void update(float deltaTime);
     void render(SDL_Renderer *renderer);
+    void applyPendingScene();
+    ~SceneManager();
 
 private:
-    Scene *currentScene;
-    Scene *pendingScene;
+    Scene *currentScene = nullptr;
+    Scene *pendingScene = nullptr;
 };
