@@ -14,6 +14,7 @@ add_executable(
     menu_scene.cpp 
     playing_scene.cpp
     timer.cpp
+    collision.cpp
 )
  
 if(TARGET SDL2::SDL2main)

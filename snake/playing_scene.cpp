@@ -19,28 +19,23 @@ void moveSnake(std::vector<Position>& snake, Delta direction, bool eat)
 }
 
 
-void generateFood(Position &food, std::vector<Position> &snake, SDL_Rect &grid)
+void generateFood(Position &food, std::vector<Position> &snake, int columns, int rows)
 {
     bool validPosition = false;
     while(!validPosition)
     {
-        food.x = rand() % 80; // assuming the grid width is 80
-        food.y = rand() % 60; // assuming the grid height is 60
+        food.x = rand() % columns;  // assuming the grid width is columns
+        food.y = rand() % rows;     // assuming the grid height is rows
 
         validPosition = true;
 	    // compara el cuerpo de snake contra la pos de la comida para evitar colocarse encima
         for(const Position& segment : snake)
         {
-            if(segment.x == food.x && segment.y == food.y)
+            if(pointVsPoint(segment, food))
             {
                 validPosition = false;
                 break;
             }
-        }
-        // comparamos la comida contra los limites del grid para evitar que se salga de la pantalla
-        if(food.x < 0 || food.x >= grid.w || food.y < 0 || food.y >= grid.h)
-        {
-            validPosition = false;
         }
         
     }
@@ -55,23 +50,29 @@ void PlayingScene::keyboardInput(SDL_Keycode key)
     if(key == SDLK_RIGHT && direction.dx != -1)  { direction.dx = 1; direction.dy = 0; }
 }
 
-void collisionDetection(std::vector<Position>& snake, Position &food, bool &eat, SDL_Rect &grid)
+void collisionDetection(std::vector<Position>& snake, Position &food, bool &eat, int columns, int rows )
 {
 	// para entender la colision de 2 objetos, es necesario que la parte de tu obj principal y su posicion, 
 	// coinsidan con la del objeto a collisionar
-    if(snake[0].x == food.x && snake[0].y == food.y)
+    if(pointVsPoint(snake[0], food))
     {
         eat = true;
         // std::cout << "Collision" << std::endl;
-        generateFood(food, snake, grid);
+        generateFood(food, snake, columns, rows);
     }
     else
     {
         eat = false;
     }
 
-    // aqui verificamos si choco contra el grid
-    if(snake[0].x < 0 || snake[0].x >= grid.w || snake[0].y < 0 || snake[0].y >= grid.h)
+    // aqui verificamos si choco contra el board
+    SDL_Rect board;
+    board.x = 0;
+    board.y = 0;
+    board.h = rows;
+    board.w = columns;
+
+    if(!pointInRect(snake[0], board))
     {
         // std::cout << "Game Over" << std::endl;
         exit(0);
@@ -89,10 +90,10 @@ void PlayingScene::drawSnake(SDL_Renderer* renderer, std::vector<Position>& snak
         // SDL_FRect rect;
         SDL_Rect rect;
 
-        rect.x = segment.x * cellSize;
-        rect.y = segment.y * cellSize;
-        rect.w = cellSize;
-        rect.h = cellSize;
+        rect.x = segment.x * CELL_SIZE;
+        rect.y = segment.y * CELL_SIZE;
+        rect.w = CELL_SIZE;
+        rect.h = CELL_SIZE;
 
         SDL_RenderFillRect(renderer, &rect);
     }
@@ -103,10 +104,10 @@ void PlayingScene::drawFood(SDL_Renderer* renderer, Position food)
 {
     SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
     SDL_Rect rect;
-    rect.x = food.x * cellSize;
-    rect.y = food.y * cellSize;
-    rect.w = cellSize;
-    rect.h = cellSize;
+    rect.x = food.x * CELL_SIZE;
+    rect.y = food.y * CELL_SIZE;
+    rect.w = CELL_SIZE;
+    rect.h = CELL_SIZE;
 
     SDL_RenderFillRect(renderer, &rect);
 }
@@ -145,6 +146,9 @@ PlayingScene::PlayingScene(SceneManager *manager)
         SCREEN_HEIGHT - 4 
     };
 
+    columns = grid.w / CELL_SIZE;
+    rows = grid.h / CELL_SIZE;
+
     // lastMovement = SDL_GetTicks();
     elapsedTime = 0;
     intervalMovement = 0.15f;
@@ -172,7 +176,7 @@ void PlayingScene::update(float deltaTime)
     if(elapsedTime >= intervalMovement)
     {
         moveSnake(snake, direction, eat);
-        collisionDetection(snake, food, eat, grid);
+        collisionDetection(snake, food, eat, columns, rows);
         elapsedTime -= intervalMovement;
     }
    

@@ -5,6 +5,7 @@
 #include "scene.h"
 #include "types.h"
 #include "globals.h"
+#include "collision.h"
 
 class SceneManager; // forward declaration — misma razón que en menu_scene.h
 
@@ -33,8 +34,10 @@ private:
     float elapsedTime;
     float intervalMovement;
 
-    static const int cellSize = 10;
+    static const int CELL_SIZE = 10;     // píxeles por celda (constante, existe desde siempre)
 
-    SDL_Rect grid;
+    SDL_Rect grid;                       // PÍXELES: solo para dibujar el marco
+    int columns;                         // CELDAS: ancho del tablero
+    int rows;                            // CELDAS: alto del tablero
 
 };
