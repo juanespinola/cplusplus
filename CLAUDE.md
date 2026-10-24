@@ -38,21 +38,27 @@ herencia "es un" vs composición "tiene un"; `virtual`/`override`/polimorfismo, 
 división entera; unidades (ms vs s); deltaTime y acumulador (como Unity / FixedUpdate);
 `srand(time(nullptr))`; cambio diferido y transferencia de propiedad (mencioné `unique_ptr`/`std::move` como próximo paso).
 
+## Hecho recientemente
+- `collision.h/.cpp`: `pointVsPoint`, `pointInRect` (tablero en **celdas**: columns/rows = grid px / CELL_SIZE).
+- En `playing_scene.cpp`: `isHittingWall`, `isHittingSelf` (for desde i=1, early return), `checkFood`.
+  `update`: mover → `if (wall || self) { changeScene(new GameOverScene); return; }` → checkFood.
+- `gameover_scene.h/.cpp`: "PERDISTE..." + JUGAR / SALIR (JUGAR vuelve a PlayingScene).
+- Serpiente arranca con cabeza en {3,3} mirando a la derecha, `direction = {1,0}` (con {0,0} chocaba consigo misma).
+- Regla vista: forward declaration en el `.h` solo si el `.h` nombra el tipo; `#include` real en el `.cpp` que lo usa.
+- `snake/todo.txt`: lista de **bugs a revisar** con forma de probarlos.
+
 ## Pendientes (en orden sugerido)
-1. **EN CURSO: archivo de colisiones genérico** `collision.h/.cpp`: funciones puras (sin clase,
-   opcional `namespace`), parámetros `const &`, devuelven `bool`.
-   Orden: (a) punto-punto (misma celda) → (b) punto dentro de rectángulo (paredes) → (c) AABB rect-rect
-   (dejarme deducir la lógica: "¿cuándo NO se tocan?"). Recordar agregar al `CMakeLists.txt`.
-   Ojo: el grid está en **píxeles** y la serpiente en **celdas** → hoy la colisión con paredes compara
-   unidades mezcladas.
-2. Reemplazar `exit(0)` de `collisionDetection` (playing_scene.cpp): al perder mostrar "GAME OVER".
-   Opciones discutidas: (A) nueva `GameOverScene` (recomendada) o (B) `bool gameOver` en PlayingScene.
-   Separar *detectar* (bool) de *decidir* (la escena en `update`).
-3. Agregar choque de la serpiente consigo misma (empezar el for desde el segmento 1, no la cabeza).
-4. Opción SALIR del menú (cómo se entera `main` para poner `running = false`).
-5. Limpieza: `moveSnake`, `generateFood`, `collisionDetection` siguen siendo funciones sueltas;
+1. **SIGUIENTE: opción SALIR** (en MenuScene y GameOverScene). Idea guiada: el SceneManager ("recepcionista")
+   tiene una "libreta" (bool) — la escena pide salir con un método, `main` la lee en el loop y pone
+   `running = false`. Mismo patrón que changeScene (uno pide, otro ejecuta). Alternativa SDL: SDL_PushEvent(SDL_QUIT).
+   Le hice 3 preguntas guía (tipo de la libreta, método para anotar, método para leer y dónde) — sin responder aún.
+2. Bug en `todo.txt`: giro de 180° con dos teclas rápidas (separar dirección pedida vs. dirección real).
+3. Limpieza: `moveSnake`, `generateFood`, `isHitting*`, `checkFood` siguen siendo funciones sueltas;
    `drawSnake`/`drawFood` reciben parámetros que sobran (shadowing con los miembros);
-   `generateFood` tiene números mágicos `% 80` / `% 60`; código comentado viejo en `main.cpp`;
-   `<iostream>` está en `playing_scene.h` (debería ir en los .cpp que lo usan);
-   `MENU_OPTIONS` duplicado en `globals.h` y `MenuScene`; `class PlayingScene;` sobra en `menu_scene.h`.
-6. A futuro: `unique_ptr`, AddressSanitizer (`-fsanitize=address`), vsync, clase `Snake` propia.
+   comentarios viejos ("assuming...") y bloque comentado de `collisionDetection`; código comentado viejo en `main.cpp`;
+   `<iostream>` y `collision.h` en `playing_scene.h` (deberían ir en el .cpp);
+   `MENU_OPTIONS` duplicado en `globals.h` y `MenuScene`; `;` suelto después de `pointInRect` en collision.cpp;
+   couts/destructores de prueba ("Se destruyo ..."); GameOverScene usa `std::cout` sin incluir `<iostream>`.
+4. Colisiones a futuro: AABB rect-rect (dejarme deducir: "¿cuándo NO se tocan?"), círculo-círculo.
+5. A futuro: puntaje, `unique_ptr`, AddressSanitizer (`-fsanitize=address`), vsync, clase `Snake` propia.
+   Después: Pong / Breakout / Tetris.

@@ -2,7 +2,6 @@
 #include "scene.h"
 
 class SceneManager; // forward declaration
-class PlayingScene;
 
 class MenuScene : public Scene
 {

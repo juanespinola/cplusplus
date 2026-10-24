@@ -1,5 +1,6 @@
 #include "playing_scene.h"
-
+#include "scene_manager.h"
+#include "gameover_scene.h"
 
 void moveSnake(std::vector<Position>& snake, Delta direction, bool eat) 
 {
@@ -50,7 +51,7 @@ void PlayingScene::keyboardInput(SDL_Keycode key)
     if(key == SDLK_RIGHT && direction.dx != -1)  { direction.dx = 1; direction.dy = 0; }
 }
 
-void collisionDetection(std::vector<Position>& snake, Position &food, bool &eat, int columns, int rows )
+bool collisionDetection(std::vector<Position>& snake, Position &food, bool &eat, int columns, int rows )
 {
 	// para entender la colision de 2 objetos, es necesario que la parte de tu obj principal y su posicion, 
 	// coinsidan con la del objeto a collisionar
@@ -72,12 +73,56 @@ void collisionDetection(std::vector<Position>& snake, Position &food, bool &eat,
     board.h = rows;
     board.w = columns;
 
-    if(!pointInRect(snake[0], board))
-    {
-        // std::cout << "Game Over" << std::endl;
-        exit(0);
-    }
+    // if(!pointInRect(snake[0], board))
+    // {
+    //     // std::cout << "Game Over" << std::endl;
+    //     exit(0);
+    // }
+    return !pointInRect(snake[0], board);
 
+}
+
+void checkFood(std::vector<Position>& snake, Position &food, bool &eat, int columns, int rows)
+{
+    if(pointVsPoint(snake[0], food))
+    {
+        eat = true;
+        // std::cout << "Collision" << std::endl;
+        generateFood(food, snake, columns, rows);
+    }
+    else
+    {
+        eat = false;
+    }
+}
+
+bool isHittingWall(std::vector<Position>& snake, int columns, int rows)
+{
+    // aqui verificamos si choco contra el board
+    SDL_Rect board;
+    board.x = 0;
+    board.y = 0;
+    board.h = rows;
+    board.w = columns;
+
+    // if(!pointInRect(snake[0], board))
+    // {
+    //     // std::cout << "Game Over" << std::endl;
+    //     exit(0);
+    // }
+    return !pointInRect(snake[0], board);
+}
+
+bool isHittingSelf(std::vector<Position>& snake)
+{
+    for (size_t i = 1; i < snake.size(); i++)
+    {
+        if(pointVsPoint(snake[0], snake[i]))
+        {
+            return true;
+        }
+    }
+    return false;
 }
 
 
@@ -129,14 +174,14 @@ PlayingScene::PlayingScene(SceneManager *manager)
     sceneManager = manager;
 
     snake = {
-        {1, 3},
-        {2, 3},
         {3, 3},
+        {2, 3},
+        {1, 3},
     };
 
     food = { 5, 5 };
     eat = false;
-    direction = { 0, 0 };
+    direction = { 1, 0 };
 
     // disenho
     grid = { 
@@ -176,7 +221,14 @@ void PlayingScene::update(float deltaTime)
     if(elapsedTime >= intervalMovement)
     {
         moveSnake(snake, direction, eat);
-        collisionDetection(snake, food, eat, columns, rows);
+        // if(collisionDetection(snake, food, eat, columns, rows))
+        if(isHittingWall(snake, columns, rows) || isHittingSelf(snake))
+        {
+            // aqui hace el cambio de escena
+            sceneManager->changeScene(new GameOverScene(sceneManager));
+            return;
+        }
+        checkFood(snake, food, eat, columns, rows);
         elapsedTime -= intervalMovement;
     }
    

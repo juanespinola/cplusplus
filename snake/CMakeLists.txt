@@ -15,6 +15,7 @@ add_executable(
     playing_scene.cpp
     timer.cpp
     collision.cpp
+    gameover_scene.cpp
 )
  
 if(TARGET SDL2::SDL2main)

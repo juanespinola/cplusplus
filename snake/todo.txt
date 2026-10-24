@@ -1,0 +1,25 @@
+========================================
+ BUGS A REVISAR
+========================================
+
+[ ] 1. Giro de 180° con dos teclas rápidas (la serpiente se come a sí misma)
+
+    Cómo probarlo:
+      - Arrancar el juego (la serpiente va hacia la DERECHA).
+      - Apretar ARRIBA e IZQUIERDA muy rápido, casi a la vez,
+        antes de que la serpiente dé el siguiente paso (< 0.15 s).
+      - Resultado esperado: la serpiente sube.
+      - Resultado actual: la cabeza se mete en el cuerpo -> pierde.
+
+    Por qué pasa:
+      - keyboardInput cambia `direction` en el momento en que se aprieta la tecla,
+        pero la serpiente se mueve recién cada `intervalMovement`.
+      - ARRIBA cambia direction a {0,-1}; entonces la guardia de IZQUIERDA
+        (direction.dx != 1) deja pasar, y queda {-1,0}: justo lo contrario
+        de hacia donde se movió de verdad.
+
+    Pista para arreglarlo:
+      - ¿Contra qué debería comparar la guardia: la última dirección PEDIDA
+        o la última dirección con la que REALMENTE se movió?
+      - (Idea: separar "dirección pedida" de "dirección actual" y aplicar
+        la pedida recién en el momento de mover.)
