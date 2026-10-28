@@ -37,3 +37,13 @@ SceneManager::~SceneManager()
     delete currentScene;
     delete pendingScene;
 }
+
+void SceneManager::requestQuit()
+{
+    requestedQuit = true;
+}
+
+bool SceneManager::isQuitRequested()
+{
+    return requestedQuit;
+}

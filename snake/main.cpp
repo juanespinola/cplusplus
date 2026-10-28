@@ -64,7 +64,6 @@ int main(int argc, char *argv[])
     /*
     *    VARIABLES DEL SISTEMA
     */
-    bool running = true;
     SDL_Event event;
     // Uint64 now = SDL_GetTicks();
 
@@ -76,15 +75,17 @@ int main(int argc, char *argv[])
     sceneManager.changeScene(new MenuScene(&sceneManager));
     Timer timer;
 
-    while (running)
+    while (!sceneManager.isQuitRequested())
     {
         sceneManager.applyPendingScene();
         while (SDL_PollEvent(&event))
         {
+            // esto permite cerrar el juego con la x, gil
             if(event.type == SDL_QUIT)
             {
-                running = false;
+                sceneManager.requestQuit();
             }
+
             
             sceneManager.handleInput(event);
             

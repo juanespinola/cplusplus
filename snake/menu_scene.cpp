@@ -38,6 +38,10 @@ void MenuScene::handleInput(SDL_Event &event)
         {
             sceneManager->changeScene(new PlayingScene(sceneManager));
         }
+        else if(selectedOption == 1)
+        {
+            sceneManager->requestQuit();
+        }
     }
 }
 

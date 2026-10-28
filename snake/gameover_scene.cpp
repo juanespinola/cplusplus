@@ -37,6 +37,10 @@ void GameOverScene::handleInput(SDL_Event &event)
         if (selectedOption == 0)
         {
             sceneManager->changeScene(new PlayingScene(sceneManager));
+        } 
+        else if(selectedOption == 1)
+        {
+            sceneManager->requestQuit();
         }
     }
 }
