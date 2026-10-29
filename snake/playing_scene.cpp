@@ -1,6 +1,7 @@
 #include "playing_scene.h"
 #include "scene_manager.h"
 #include "gameover_scene.h"
+#include "char_letras.h"
 
 void moveSnake(std::vector<Position>& snake, Delta direction, bool eat) 
 {
@@ -172,7 +173,12 @@ void PlayingScene::drawPanel(SDL_Renderer* renderer)
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
     
     // SDL_RenderFillRect(renderer, &rect); // dibuja un cuadrado blanco en el centro de la ventana
-    SDL_RenderDrawRect(renderer, &panel); // dibuja un cuadrado blanco en el centro de la ventana           
+    SDL_RenderDrawRect(renderer, &panel); // dibuja un cuadrado blanco en el centro de la ventana      
+    
+    SDL_Color normal = {255, 255, 255, 255};   // blanco
+    drawText(renderer, "SNAKE", {40, 30}, 6, 4, normal);
+    drawText(renderer, "POINT", {40, 150}, 4, 4, normal);
+    drawText(renderer, "I", {170, 150}, 4, 4, normal);
 }
 
 
