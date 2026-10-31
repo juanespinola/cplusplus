@@ -4,6 +4,7 @@
 #include <SDL2/SDL_image.h>
 #include <cstdlib>
 #include <ctime>
+#include <string>
 
 #include "char_letras.h"
 #include "scene_manager.h"
@@ -47,6 +48,11 @@ int main(int argc, char *argv[])
 
     SDL_Init(SDL_INIT_VIDEO);
     SDL_CreateWindowAndRenderer(SCREEN_WIDTH, SCREEN_HEIGHT, 0, &window, &renderer);
+    int setVSync = SDL_RenderSetVSync(renderer, 1);   // 1 = activado, 0 = desactivado
+    if(setVSync) 
+    {
+        std::cout << "Error setVSync: " << SDL_GetError() << std::endl;
+    }
     // SDL_SetRenderScale(renderer, 4, 4);
 
     /*
@@ -148,6 +154,9 @@ int main(int argc, char *argv[])
 
         sceneManager.render(renderer);
 
+        SDL_Color white = {255, 255, 255, 255};   // blanco
+        std::string fps = "FPS " + std::to_string(timer.getFPS());
+        drawText(renderer, fps.c_str(), { 50, SCREEN_HEIGHT - 50}, 2, 2,  white);
         
 
         // update

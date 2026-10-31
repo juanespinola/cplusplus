@@ -1,5 +1,5 @@
 #pragma once
-#include <iostream>
+#include <iostream> // este hay que sacar mas adelante
 #include <vector>
 
 #include "scene.h"
@@ -34,6 +34,7 @@ private:
     bool eat;
     float elapsedTime;
     float intervalMovement;
+    int points;
 
     static const int CELL_SIZE = 10;     // píxeles por celda (constante, existe desde siempre)
 

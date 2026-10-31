@@ -1,3 +1,5 @@
+#include <string>
+
 #include "playing_scene.h"
 #include "scene_manager.h"
 #include "gameover_scene.h"
@@ -83,11 +85,14 @@ bool collisionDetection(std::vector<Position>& snake, Position &food, bool &eat,
 
 }
 
-void checkFood(std::vector<Position>& snake, Position &food, bool &eat, int columns, int rows)
+void checkFood(std::vector<Position>& snake, Position &food, bool &eat, int columns, int rows, int &points)
 {
     if(pointVsPoint(snake[0], food))
     {
         eat = true;
+        points++;
+
+        // std::cout << points << std::endl;
         // std::cout << "Collision" << std::endl;
         generateFood(food, snake, columns, rows);
     }
@@ -176,9 +181,12 @@ void PlayingScene::drawPanel(SDL_Renderer* renderer)
     SDL_RenderDrawRect(renderer, &panel); // dibuja un cuadrado blanco en el centro de la ventana      
     
     SDL_Color normal = {255, 255, 255, 255};   // blanco
+
+    std::string pointsText = std::to_string(points);
+
     drawText(renderer, "SNAKE", {40, 30}, 6, 4, normal);
     drawText(renderer, "POINT", {40, 150}, 4, 4, normal);
-    drawText(renderer, "I", {170, 150}, 4, 4, normal);
+    drawText(renderer, pointsText.c_str(), {170, 150}, 4, 4, normal);
 }
 
 
@@ -196,6 +204,7 @@ PlayingScene::PlayingScene(SceneManager *manager)
     food = { 5, 5 };
     eat = false;
     direction = { 1, 0 };
+    points = 0;
 
     // disenho
     // GRID: pegado a la derecha
@@ -232,7 +241,7 @@ void PlayingScene::update(float deltaTime)
     
     elapsedTime += deltaTime;
 
-    // std::cout << elapsedTime << std::endl;
+    std::cout << elapsedTime << std::endl;
 
     if(elapsedTime >= intervalMovement)
     {
@@ -244,7 +253,7 @@ void PlayingScene::update(float deltaTime)
             sceneManager->changeScene(new GameOverScene(sceneManager));
             return;
         }
-        checkFood(snake, food, eat, COLUMNS, ROWS);
+        checkFood(snake, food, eat, COLUMNS, ROWS, points);
         elapsedTime -= intervalMovement;
     }
    

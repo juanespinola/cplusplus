@@ -8,6 +8,11 @@ class Timer
 private:
     float deltaTime; 
     Uint64 lastTick;
+
+    // fps
+    int frames;         
+    float alcanciaFps;
+    int fps;
     
 public:
     Timer();
@@ -15,4 +20,6 @@ public:
     void tick();
     float getDeltaTime();
     void restart();
+
+    int getFPS();
 };
