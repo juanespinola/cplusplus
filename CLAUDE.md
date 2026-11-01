@@ -11,7 +11,7 @@
   "pintor" para el orden clear→render→present, "recepcionista" para el SceneManager).
 - Vengo de C#/Unity: compararlo con Unity me ayuda.
 
-## Proyecto actual: `snake/` (C++17 + SDL2 + CMake)
+## Proyecto `snake/` (C++17 + SDL2 + CMake) — **CERRADO** (jugable y completo, 2026-11-01)
 Arquitectura de escenas ya funcionando:
 - `scene.h` — clase base abstracta `Scene` (handleInput / update / render, `virtual` + destructor virtual).
 - `scene_manager.h/.cpp` — dueño de las escenas. **Cambio diferido**: `changeScene()` solo anota en
@@ -50,6 +50,8 @@ paso por valor (copia) vs por referencia (bug real: `int points` sin `&` no suma
 (sacar `<iostream>` de `playing_scene.h` rompió Menu/GameOver que usaban `cout` sin incluirlo).
 
 ## Hecho recientemente
+- **Bug del giro de 180° arreglado**: `direction` (real) + `nextDirection` (pedida). `keyboardInput` compara
+  contra `direction` y escribe `nextDirection`; `update` hace `direction = nextDirection` justo antes de mover.
 - **VSync + contador de FPS** en `Timer`, dibujado desde `main` (ver arriba).
 - **SALIR** funcionando (patrón "libreta" del SceneManager, ver arriba).
 - **Panel** lateral izquierdo + **puntaje**: `points` (miembro, = 0 en el constructor), `checkFood(..., int &points)`
@@ -60,10 +62,12 @@ paso por valor (copia) vs por referencia (bug real: `int points` sin `&` no suma
 - Regla vista: forward declaration en el `.h` solo si el `.h` nombra el tipo; `#include` real en el `.cpp` que lo usa.
 - `snake/todo.txt`: lista de **bugs a revisar** con forma de probarlos.
 
-## Pendientes (en orden sugerido)
+## Pendientes
+**Próximo paso: nuevo proyecto** (Pong / Breakout / Tetris). Lo de abajo en snake queda como mejoras opcionales.
 1. Detalles del FPS: `main.cpp` usa `std::string` sin `#include <string>`; spacing 0 en `drawText` (letras pegadas);
    fallback en `getLetraMayuscula` para caracteres fuera de la fuente (minúsculas, ':' → índice fuera del array).
-2. **SIGUIENTE:** Bug en `todo.txt`: giro de 180° con dos teclas rápidas (separar dirección pedida vs. dirección real).
+2. Opcional: cola de teclas (buffer) para que "arriba + izquierda" rápido haga los dos giros en vez de descartar el segundo.
+   Sacar el `std::cout << elapsedTime` de prueba en `PlayingScene::update`.
 3. Limpieza: `moveSnake`, `generateFood`, `isHitting*`, `checkFood` siguen siendo funciones sueltas;
    `drawSnake`/`drawFood` reciben parámetros que sobran (shadowing con los miembros);
    comentarios viejos ("assuming...") y bloque comentado de `collisionDetection`; código comentado viejo en `main.cpp`;

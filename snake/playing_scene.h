@@ -31,6 +31,7 @@ private:
     std::vector<Position> snake;
     Position food;
     Delta direction;
+    Delta nextDirection;
     bool eat;
     float elapsedTime;
     float intervalMovement;

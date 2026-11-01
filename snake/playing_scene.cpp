@@ -48,10 +48,10 @@ void generateFood(Position &food, std::vector<Position> &snake, int columns, int
 
 void PlayingScene::keyboardInput(SDL_Keycode key)
 {
-    if(key == SDLK_UP && direction.dy != 1)     { direction.dx = 0; direction.dy = -1; } 
-    if(key == SDLK_DOWN && direction.dy != -1)   { direction.dx = 0; direction.dy = 1; }
-    if(key == SDLK_LEFT && direction.dx != 1)   { direction.dx = -1; direction.dy = 0; }
-    if(key == SDLK_RIGHT && direction.dx != -1)  { direction.dx = 1; direction.dy = 0; }
+    if(key == SDLK_UP && direction.dy != 1)      { nextDirection.dx = 0;  nextDirection.dy = -1; } 
+    if(key == SDLK_DOWN && direction.dy != -1)   { nextDirection.dx = 0;  nextDirection.dy = 1;  }
+    if(key == SDLK_LEFT && direction.dx != 1)    { nextDirection.dx = -1; nextDirection.dy = 0;  }
+    if(key == SDLK_RIGHT && direction.dx != -1)  { nextDirection.dx = 1;  nextDirection.dy = 0;  }
 }
 
 bool collisionDetection(std::vector<Position>& snake, Position &food, bool &eat, int columns, int rows )
@@ -204,6 +204,7 @@ PlayingScene::PlayingScene(SceneManager *manager)
     food = { 5, 5 };
     eat = false;
     direction = { 1, 0 };
+    nextDirection = { 1, 0 };
     points = 0;
 
     // disenho
@@ -245,6 +246,7 @@ void PlayingScene::update(float deltaTime)
 
     if(elapsedTime >= intervalMovement)
     {
+        direction = nextDirection;
         moveSnake(snake, direction, eat);
         // if(collisionDetection(snake, food, eat, columns, rows))
         if(isHittingWall(snake, COLUMNS, ROWS) || isHittingSelf(snake))

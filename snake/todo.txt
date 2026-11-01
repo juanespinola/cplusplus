@@ -2,7 +2,7 @@
  BUGS A REVISAR
 ========================================
 
-[ ] 1. Giro de 180° con dos teclas rápidas (la serpiente se come a sí misma)
+[x] 1. Giro de 180° con dos teclas rápidas (la serpiente se come a sí misma)
 
     Cómo probarlo:
       - Arrancar el juego (la serpiente va hacia la DERECHA).
